@@ -1,134 +1,322 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ESG Collaboration Mapping Dashboard</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>China ESG Collaboration Dashboard</title>
 
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 
-  <!-- PapaParse -->
+  <!-- CSV loader -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
-  <link rel="stylesheet" href="styles.css">
+  <!-- Multi-select -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+  <link rel="stylesheet" href="./assets/style.css" />
+  <link rel="icon" href="./assets/logo.svg" />
 </head>
 
-<body>
-
-<div class="app">
-
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <h2>ESG Mapping</h2>
-    </div>
-
-    <div class="filter-group">
-      <label>Dataset</label>
-      <select id="datasetToggle">
-        <option value="subset">111 Clean Subset</option>
-        <option value="full">501 Full Extraction</option>
-      </select>
-    </div>
-
-    <div class="filter-group">
-      <label>Collaboration Type</label>
-      <select id="collabFilter">
-        <option value="ALL">All</option>
-        <option value="BN">BN</option>
-        <option value="BG">BG</option>
-        <option value="BS">BS</option>
-      </select>
-    </div>
-
-    <div class="filter-group">
-      <label>ESG Block</label>
-      <select id="esgFilter">
-        <option value="ALL">All</option>
-        <option value="E">E</option>
-        <option value="S">S</option>
-        <option value="G">G</option>
-        <option value="X">Cross</option>
-      </select>
-    </div>
-
-    <div class="filter-group">
-      <label>Sector</label>
-      <select id="sectorFilter"></select>
-    </div>
-
-    <div class="sidebar-footer">
-      <button id="resetBtn">Reset</button>
-    </div>
-  </aside>
-
-
-  <!-- Main Content -->
-  <main class="main">
-
-    <header class="topbar">
+<body class="min-h-screen bg-slate-50 text-slate-900">
+  <!-- Loading overlay -->
+  <div id="loadingOverlay">
+    <div class="card p-6 flex items-center gap-4">
+      <div class="spinner"></div>
       <div>
-        <h1 id="title">ESG Collaboration Mapping</h1>
-        <p id="subtitle">Chinese Companies • BRICS+ Focus</p>
+        <div class="font-semibold">Loading dashboard…</div>
+        <div class="muted text-sm mt-1">Reading CSVs from /data and building visuals.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 card px-4 py-2 text-sm opacity-100">
+    Copied.
+  </div>
+
+  <!-- Top bar -->
+  <header class="sticky top-0 z-30 border-b border-slate-200 bg-white/85 backdrop-blur">
+    <div class="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <img src="./assets/logo.svg" alt="logo" class="h-10 w-10 rounded-2xl" />
+        <div>
+          <div class="text-lg font-semibold leading-tight">China ESG Collaboration Dashboard</div>
+          <div class="text-sm muted leading-tight">
+            Evidence-backed ESG initiative analytics (Clean subset + Full extraction)
+          </div>
+        </div>
       </div>
 
-      <div class="top-actions">
-        <button id="langToggle">RU</button>
-        <button id="darkToggle">🌙</button>
+      <div class="flex items-center gap-2">
+        <a class="btn" href="#library" title="Jump to evidence table">Evidence library</a>
+        <a class="btn btn-primary" href="#patterns" title="Jump to patterns">Patterns</a>
       </div>
-    </header>
+    </div>
+  </header>
 
-    <!-- KPI Cards -->
-    <section class="kpi-grid">
-      <div class="kpi-card">
-        <span id="kpiInitiatives">0</span>
-        <label>Initiatives</label>
+  <main class="mx-auto max-w-7xl px-4 py-6 space-y-6">
+    <div id="fatalError" class="hidden card p-4 border border-red-200 bg-red-50">
+      <div class="font-semibold text-red-800">Dashboard failed to load</div>
+      <div class="text-sm text-red-700 mt-2">Error:</div>
+      <pre id="fatalErrorText" class="text-xs mt-2 whitespace-pre-wrap"></pre>
+      <div class="text-sm text-red-800 mt-3">
+        Check that all required CSV files exist in <code>/data</code> and are committed to GitHub Pages.
       </div>
-      <div class="kpi-card">
-        <span id="kpiCompanies">0</span>
-        <label>Companies</label>
+    </div>
+
+    <!-- Filters -->
+    <section class="card p-4">
+      <div class="flex flex-col lg:flex-row lg:items-end gap-4">
+        <div class="flex-1">
+          <div class="text-sm muted">Dataset</div>
+          <select id="datasetMode" class="w-full">
+            <option value="CLEAN (111)">CLEAN (111)</option>
+            <option value="FULL (501)">FULL (501)</option>
+          </select>
+          <div id="datasetNote" class="text-xs muted mt-2"></div>
+        </div>
+
+        <div class="flex-1">
+          <div class="text-sm muted">Collaboration type</div>
+          <select id="collabFilter" multiple class="w-full"></select>
+        </div>
+
+        <div class="flex-1">
+          <div class="text-sm muted">ESG block</div>
+          <select id="esgFilter" multiple class="w-full"></select>
+        </div>
+
+        <div class="flex-1">
+          <div class="text-sm muted">Industry sector</div>
+          <select id="sectorFilter" multiple class="w-full"></select>
+        </div>
       </div>
-      <div class="kpi-card">
-        <span id="kpiBN">0</span>
-        <label>BN</label>
+
+      <div class="mt-4 grid grid-cols-1 lg:grid-cols-5 gap-4">
+        <div>
+          <div class="text-sm muted">Theme tag</div>
+          <select id="themeFilter" multiple class="w-full"></select>
+        </div>
+
+        <div>
+          <div class="text-sm muted">Company</div>
+          <select id="companyFilter" multiple class="w-full"></select>
+        </div>
+
+        <div>
+          <div class="text-sm muted">Cluster (clean only)</div>
+          <select id="clusterFilter" multiple class="w-full"></select>
+        </div>
+
+        <div>
+          <div class="text-sm muted">KPI present</div>
+          <select id="kpiFilter" class="w-full border border-slate-200 rounded-xl px-3 py-2 bg-white/80">
+            <option value="ALL">All</option>
+            <option value="YES">YES</option>
+            <option value="NO">NO</option>
+            <option value="NOT STATED">NOT STATED</option>
+          </select>
+        </div>
+
+        <div>
+          <div class="text-sm muted">Search</div>
+          <input id="searchBox" type="text" placeholder="title / evidence / actors…"
+                 class="w-full border border-slate-200 rounded-xl px-3 py-2 bg-white/80" />
+        </div>
       </div>
-      <div class="kpi-card">
-        <span id="kpiBG">0</span>
-        <label>BG</label>
-      </div>
-      <div class="kpi-card">
-        <span id="kpiBS">0</span>
-        <label>BS</label>
+
+      <div class="mt-4 flex flex-wrap items-center gap-2">
+        <button id="resetBtn" class="btn btn-danger">Reset filters</button>
+        <button id="downloadBtn" class="btn btn-primary">Download filtered CSV</button>
+        <div class="text-xs muted">
+          Notes: patterns/mechanisms/partner-types are precomputed on the clean subset.
+        </div>
       </div>
     </section>
 
-    <!-- Charts -->
-    <section class="charts-grid">
-      <div class="chart-card">
-        <h3>Collaboration Distribution</h3>
-        <canvas id="collabChart"></canvas>
+    <!-- KPIs -->
+    <section class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+      <div class="kpi p-4">
+        <div class="text-xs muted">Initiatives (filtered)</div>
+        <div id="kpiInitiatives" class="text-2xl font-semibold mt-1">0</div>
       </div>
-
-      <div class="chart-card">
-        <h3>ESG Block Distribution</h3>
-        <canvas id="esgChart"></canvas>
+      <div class="kpi p-4">
+        <div class="text-xs muted">Companies (filtered)</div>
+        <div id="kpiCompanies" class="text-2xl font-semibold mt-1">0</div>
       </div>
-
-      <div class="chart-card full">
-        <h3>Top Mechanism Signals</h3>
-        <canvas id="mechChart"></canvas>
+      <div class="kpi p-4">
+        <div class="text-xs muted">BG</div>
+        <div id="kpiBG" class="text-2xl font-semibold mt-1">0</div>
+      </div>
+      <div class="kpi p-4">
+        <div class="text-xs muted">BN</div>
+        <div id="kpiBN" class="text-2xl font-semibold mt-1">0</div>
+      </div>
+      <div class="kpi p-4">
+        <div class="text-xs muted">BS</div>
+        <div id="kpiBS" class="text-2xl font-semibold mt-1">0</div>
+        <div class="text-xs muted mt-2">BB shown in KPIs only when present</div>
       </div>
     </section>
 
+    <!-- Tabs -->
+    <section class="card p-4">
+      <div class="flex flex-wrap gap-2">
+        <button id="tabOverview" class="tab active">Overview</button>
+        <button id="tabPatterns" class="tab">Patterns</button>
+        <button id="tabLibrary" class="tab">Initiative library</button>
+        <button id="tabMethods" class="tab">Method & definitions</button>
+      </div>
+
+      <!-- Overview panel -->
+      <div id="panelOverview" class="mt-4 space-y-5">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div class="card p-4">
+            <div class="font-semibold">Initiatives by collaboration type</div>
+            <div class="text-xs muted mt-1">Computed from selected dataset (clean/full).</div>
+            <canvas id="chartCollab" class="mt-3"></canvas>
+          </div>
+          <div class="card p-4">
+            <div class="font-semibold">Initiatives by ESG block</div>
+            <div class="text-xs muted mt-1">Computed from selected dataset (clean/full).</div>
+            <canvas id="chartESG" class="mt-3"></canvas>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div class="card p-4">
+            <div class="font-semibold">Top theme tags (filtered)</div>
+            <div class="text-xs muted mt-1">Computed from selected dataset (clean/full).</div>
+            <canvas id="chartTheme" class="mt-3"></canvas>
+          </div>
+          <div class="card p-4">
+            <div class="font-semibold">Mechanism signals (precomputed)</div>
+            <div class="text-xs muted mt-1">From patterns_mechanism_counts.csv (clean subset).</div>
+            <canvas id="chartMechanism" class="mt-3"></canvas>
+          </div>
+        </div>
+
+        <div class="card p-4">
+          <div class="font-semibold">Partner types by collaboration type (precomputed)</div>
+          <div class="text-xs muted mt-1">
+            From patterns_partner_types_from_initiatives.csv. Counts are partner edges/mentions, not initiative counts.
+          </div>
+          <canvas id="chartPartner" class="mt-3"></canvas>
+        </div>
+      </div>
+
+      <!-- Patterns panel -->
+      <div id="panelPatterns" class="hidden mt-4 space-y-4">
+        <div id="patterns" class="flex items-center justify-between gap-3">
+          <div>
+            <div class="text-lg font-semibold">Top patterns (10)</div>
+            <div class="text-sm muted">
+              From generic_patterns_brief_top10.csv. Click “View examples” to open evidence-backed entries.
+            </div>
+          </div>
+        </div>
+        <div id="topPatterns" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
+      </div>
+
+      <!-- Library panel -->
+      <div id="panelLibrary" class="hidden mt-4 space-y-4">
+        <div id="library" class="flex items-center justify-between gap-3">
+          <div>
+            <div class="text-lg font-semibold">Evidence-backed initiative library</div>
+            <div class="text-sm muted">
+              Each row includes file + page + 15-word evidence quote. Use filters above to narrow.
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <label class="text-sm muted">Rows/page</label>
+            <select id="pageSize" class="border border-slate-200 rounded-xl px-2 py-2 bg-white/80">
+              <option>10</option>
+              <option selected>20</option>
+              <option>50</option>
+              <option>100</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="text-sm muted" id="pageInfo">Page 1 / 1</div>
+          <div class="flex items-center gap-2">
+            <button id="pagePrev" class="btn">Prev</button>
+            <input id="pageNum" type="number" min="1" value="1"
+                   class="w-20 border border-slate-200 rounded-xl px-2 py-2 bg-white/80" />
+            <button id="pageNext" class="btn">Next</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Company</th>
+                <th>Collab</th>
+                <th>ESG</th>
+                <th>Theme</th>
+                <th>Title</th>
+                <th>KPI</th>
+                <th>Geo</th>
+                <th>Evidence</th>
+                <th>Quote (15w)</th>
+                <th>Copy cite</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Methods panel -->
+      <div id="panelMethods" class="hidden mt-4 space-y-3">
+        <div class="text-lg font-semibold">Method & definitions</div>
+        <div class="text-sm muted">
+          This dashboard reads the exported CSVs. It does not re-parse PDFs in the browser.
+        </div>
+        <div class="card p-4 text-sm space-y-2">
+          <div class="font-semibold">Datasets</div>
+          <ul class="list-disc ml-6 space-y-1">
+            <li><b>CLEAN (111)</b>: evidence-backed subset used for clustering/pattern mining (<code>data/initiatives.csv</code>).</li>
+            <li><b>FULL (501)</b>: broader extraction including BB and multi-actor records (<code>data/initiatives2.csv</code>).</li>
+          </ul>
+          <div class="hr my-3"></div>
+          <div><b>Slide consistency rule:</b> initiative counts ≠ partner edge counts. One initiative can name multiple partners.</div>
+          <div><b>Precomputed files:</b> mechanisms, partner-type distribution, and top patterns are computed on CLEAN subset.</div>
+          <div><b>Auditability:</b> initiative rows preserve evidence (file, page, 15-word quote, excerpt).</div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="py-6 text-xs muted text-center">
+      Static dashboard optimized for GitHub Pages • BRICS+ intersectional collaboration (China pilot)
+    </footer>
   </main>
 
-</div>
+  <!-- Examples Modal -->
+  <div id="examplesModal" class="hidden fixed inset-0 z-40">
+    <div id="examplesBackdrop" class="absolute inset-0 bg-black/30"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+      <div class="card max-w-4xl w-full p-4">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <div class="text-sm muted">Pattern examples</div>
+            <div id="examplesTitle" class="text-lg font-semibold">—</div>
+          </div>
+          <button id="modalClose" class="btn">Close</button>
+        </div>
+        <div id="examplesBody" class="mt-4 max-h-[70vh] overflow-auto pr-1"></div>
+      </div>
+    </div>
+  </div>
 
-<script src="app.js"></script>
-
+  <script src="./assets/dashboard.js"></script>
 </body>
 </html>
