@@ -18,6 +18,279 @@ const DATA = {
 
 function $(id){ return document.getElementById(id); }
 
+/* ------------------------- */
+/* i18n (EN/RU)              */
+/* ------------------------- */
+const I18N = {
+  en: {
+    loading_title: "Loading dashboard…",
+    loading_sub: "Reading CSVs from /data and building visuals.",
+    app_title: "China ESG Collaboration Dashboard",
+    app_subtitle: "Evidence-backed ESG initiative analytics (Clean subset + Full extraction)",
+    nav_library: "Evidence library",
+    nav_patterns: "Patterns",
+    theme_day: "Day",
+    theme_night: "Night",
+
+    fatal_title: "Dashboard failed to load",
+    fatal_error_label: "Error:",
+    fatal_hint: "Check that all required CSV files exist in /data and are committed to GitHub Pages.",
+
+    filter_dataset: "Dataset",
+    filter_collab: "Collaboration type",
+    filter_esg: "ESG block",
+    filter_sector: "Industry sector",
+    filter_theme: "Theme tag",
+    filter_company: "Company",
+    filter_cluster: "Cluster (clean only)",
+    filter_kpi: "KPI present",
+    filter_search: "Search",
+    kpi_all: "All",
+    kpi_not_stated: "NOT STATED",
+
+    btn_reset: "Reset filters",
+    btn_download: "Download filtered CSV",
+    note_precomputed: "Notes: patterns/mechanisms/partner-types are precomputed on the clean subset.",
+
+    kpi_inits: "Initiatives (filtered)",
+    kpi_companies: "Companies (filtered)",
+    kpi_bb_note: "BB shown in KPIs only when present",
+
+    tab_overview: "Overview",
+    tab_patterns: "Patterns",
+    tab_library: "Initiative library",
+    tab_methods: "Method & definitions",
+
+    ov_collab_title: "Initiatives by collaboration type",
+    ov_collab_sub: "Computed from selected dataset (clean/full).",
+    ov_esg_title: "Initiatives by ESG block",
+    ov_esg_sub: "Computed from selected dataset (clean/full).",
+    ov_theme_title: "Top theme tags (filtered)",
+    ov_theme_sub: "Computed from selected dataset (clean/full).",
+    ov_mech_title: "Mechanism signals (precomputed)",
+    ov_mech_sub: "From patterns_mechanism_counts.csv (clean subset).",
+    ov_partner_title: "Partner types by collaboration type (precomputed)",
+    ov_partner_sub: "From patterns_partner_types_from_initiatives.csv. Counts are partner edges/mentions, not initiative counts.",
+
+    pat_top_title: "Top patterns (10)",
+    pat_top_sub: "From generic_patterns_brief_top10.csv. Click “View examples” to open evidence-backed entries.",
+    view_examples: "View examples",
+    examples_limit_note: "Showing up to 25 initiatives in this pattern (filtered).",
+    examples_summary_label: "Summary examples:",
+    modal_sub: "Pattern examples",
+
+    lib_title: "Evidence-backed initiative library",
+    lib_sub: "Each row includes file + page + 15-word evidence quote. Use filters above to narrow.",
+    lib_rows_per_page: "Rows/page",
+    btn_prev: "Prev",
+    btn_next: "Next",
+
+    th_id: "ID",
+    th_company: "Company",
+    th_collab: "Collab",
+    th_esg: "ESG",
+    th_theme: "Theme",
+    th_title: "Title",
+    th_kpi: "KPI",
+    th_geo: "Geo",
+    th_evidence: "Evidence",
+    th_quote: "Quote (15w)",
+    th_copy: "Copy cite",
+    btn_copy: "Copy",
+
+    meth_title: "Method & definitions",
+    meth_sub: "This dashboard reads the exported CSVs. It does not re-parse PDFs in the browser.",
+    meth_datasets: "Datasets",
+    meth_clean: "CLEAN (111): evidence-backed subset used for clustering/pattern mining (data/initiatives.csv).",
+    meth_full: "FULL (501): broader extraction including BB and multi-actor records (data/initiatives2.csv).",
+    meth_rule1: "<b>Slide consistency rule:</b> initiative counts ≠ partner edge counts. One initiative can name multiple partners.",
+    meth_rule2: "<b>Precomputed files:</b> mechanisms, partner-type distribution, and top patterns are computed on CLEAN subset.",
+    meth_rule3: "<b>Auditability:</b> initiative rows preserve evidence (file, page, 15-word quote, excerpt).",
+
+    footer: "Static dashboard optimized for GitHub Pages • BRICS+ intersectional collaboration (China pilot)",
+
+    btn_close: "Close",
+    toast_copied: "Copied.",
+    toast_copy_failed: "Copy failed.",
+    toast_no_rows: "No rows to download.",
+    toast_reset: "Filters reset.",
+
+    dataset_note_clean: "CLEAN subset selected (111 rows). Pattern summaries/mechanisms/partner-types align to this subset.",
+    dataset_note_full: "FULL dataset selected (501 rows). Pattern summaries/mechanisms/partner-types are computed on CLEAN subset.",
+
+    search_placeholder: "title / evidence / actors…",
+    patterns_only_clean_note:
+      "Pattern clusters are computed on CLEAN (111). Switch dataset to CLEAN to browse cluster-filtered initiatives.",
+    evidence_label: "Evidence:",
+  },
+  ru: {
+    loading_title: "Загрузка панели…",
+    loading_sub: "Чтение CSV из /data и построение визуализаций.",
+    app_title: "Панель ESG-сотрудничества (Китай)",
+    app_subtitle: "Аналитика инициатив ESG с доказательной базой (чистая выборка + полная выгрузка)",
+    nav_library: "Библиотека доказательств",
+    nav_patterns: "Паттерны",
+    theme_day: "День",
+    theme_night: "Ночь",
+
+    fatal_title: "Не удалось загрузить панель",
+    fatal_error_label: "Ошибка:",
+    fatal_hint: "Проверьте, что все CSV есть в /data и закоммичены для GitHub Pages.",
+
+    filter_dataset: "Набор данных",
+    filter_collab: "Тип сотрудничества",
+    filter_esg: "Блок ESG",
+    filter_sector: "Отрасль",
+    filter_theme: "Тема",
+    filter_company: "Компания",
+    filter_cluster: "Кластер (только clean)",
+    filter_kpi: "Есть KPI",
+    filter_search: "Поиск",
+    kpi_all: "Все",
+    kpi_not_stated: "НЕ УКАЗАНО",
+
+    btn_reset: "Сбросить фильтры",
+    btn_download: "Скачать отфильтрованный CSV",
+    note_precomputed: "Примечание: паттерны/механизмы/типы партнёров предрасчитаны на чистой выборке.",
+
+    kpi_inits: "Инициативы (фильтр)",
+    kpi_companies: "Компании (фильтр)",
+    kpi_bb_note: "BB показывается в KPI только если присутствует",
+
+    tab_overview: "Обзор",
+    tab_patterns: "Паттерны",
+    tab_library: "Библиотека инициатив",
+    tab_methods: "Метод и определения",
+
+    ov_collab_title: "Инициативы по типу сотрудничества",
+    ov_collab_sub: "Считается по выбранному набору (clean/full).",
+    ov_esg_title: "Инициативы по блоку ESG",
+    ov_esg_sub: "Считается по выбранному набору (clean/full).",
+    ov_theme_title: "Топ тем (фильтр)",
+    ov_theme_sub: "Считается по выбранному набору (clean/full).",
+    ov_mech_title: "Механизмы (предрасчитано)",
+    ov_mech_sub: "Из patterns_mechanism_counts.csv (чистая выборка).",
+    ov_partner_title: "Типы партнёров по типу сотрудничества (предрасчитано)",
+    ov_partner_sub: "Из patterns_partner_types_from_initiatives.csv. Это «рёбра/упоминания», а не число инициатив.",
+
+    pat_top_title: "Топ паттернов (10)",
+    pat_top_sub: "Из generic_patterns_brief_top10.csv. Нажмите «Примеры», чтобы открыть записи с доказательствами.",
+    view_examples: "Примеры",
+    examples_limit_note: "Показано до 25 инициатив в этом паттерне (с учётом фильтров).",
+    examples_summary_label: "Примеры из сводки:",
+    modal_sub: "Примеры паттерна",
+
+    lib_title: "Библиотека инициатив с доказательствами",
+    lib_sub: "Каждая строка содержит файл + страницу + 15-словную цитату. Используйте фильтры выше.",
+    lib_rows_per_page: "Строк/страница",
+    btn_prev: "Назад",
+    btn_next: "Вперёд",
+
+    th_id: "ID",
+    th_company: "Компания",
+    th_collab: "Тип",
+    th_esg: "ESG",
+    th_theme: "Тема",
+    th_title: "Название",
+    th_kpi: "KPI",
+    th_geo: "Гео",
+    th_evidence: "Доказательство",
+    th_quote: "Цитата (15 слов)",
+    th_copy: "Скопировать ссылку",
+    btn_copy: "Копировать",
+
+    meth_title: "Метод и определения",
+    meth_sub: "Панель читает готовые CSV. PDF в браузере не парсятся.",
+    meth_datasets: "Наборы данных",
+    meth_clean: "CLEAN (111): чистая выборка с доказательствами для кластеризации (data/initiatives.csv).",
+    meth_full: "FULL (501): полная выгрузка, включая BB и multi-actor (data/initiatives2.csv).",
+    meth_rule1: "<b>Правило согласованности:</b> число инициатив ≠ число рёбер партнёров. Одна инициатива может иметь несколько партнёров.",
+    meth_rule2: "<b>Предрасчитано:</b> механизмы/типы партнёров/топ паттерны рассчитаны на CLEAN.",
+    meth_rule3: "<b>Проверяемость:</b> строки содержат доказательства (файл, страница, 15 слов, отрывок).",
+
+    footer: "Статическая панель для GitHub Pages • BRICS+ межсекторное сотрудничество (пилот: Китай)",
+
+    btn_close: "Закрыть",
+    toast_copied: "Скопировано.",
+    toast_copy_failed: "Не удалось скопировать.",
+    toast_no_rows: "Нет строк для скачивания.",
+    toast_reset: "Фильтры сброшены.",
+
+    dataset_note_clean: "Выбрана CLEAN-выборка (111 строк). Паттерны/механизмы/типы партнёров соответствуют этой выборке.",
+    dataset_note_full: "Выбрана FULL-выгрузка (501 строка). Паттерны/механизмы/типы партнёров рассчитаны на CLEAN-выборке.",
+
+    search_placeholder: "название / доказательство / акторы…",
+    patterns_only_clean_note:
+      "Кластеры рассчитаны на CLEAN (111). Переключитесь на CLEAN, чтобы фильтровать по кластерам.",
+    evidence_label: "Доказательство:",
+  }
+};
+
+let CURRENT_LANG = "en";
+function t(key){
+  const dict = I18N[CURRENT_LANG] || I18N.en;
+  return (dict[key] !== undefined) ? dict[key] : (I18N.en[key] ?? key);
+}
+function applyI18n(){
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    const key = el.getAttribute("data-i18n");
+    // Some entries include HTML (methods rules) -> set as HTML; otherwise text.
+    const val = t(key);
+    if (key.startsWith("meth_rule")) {
+      el.innerHTML = val;
+    } else {
+      el.textContent = val;
+    }
+  });
+
+  // placeholders not controlled by data-i18n
+  const sb = $("searchBox");
+  if (sb) sb.placeholder = t("search_placeholder");
+
+  // update toast default text (hidden state)
+  const toast = $("toast");
+  if (toast && toast.classList.contains("hidden")) toast.textContent = t("toast_copied");
+}
+
+/* ------------------------- */
+/* Theme (Day/Night)         */
+/* ------------------------- */
+let CURRENT_THEME = "light";
+function applyTheme(theme){
+  CURRENT_THEME = theme === "dark" ? "dark" : "light";
+  document.documentElement.setAttribute("data-theme", CURRENT_THEME);
+
+  // Toggle button text/icon
+  const icon = $("themeIcon");
+  const label = $("themeLabel");
+  if (CURRENT_THEME === "dark"){
+    if (icon) icon.textContent = "☀️";
+    if (label) label.textContent = t("theme_day");
+  } else {
+    if (icon) icon.textContent = "🌙";
+    if (label) label.textContent = t("theme_night");
+  }
+
+  // Apply chart defaults (ticks/grid) so dark mode is readable
+  applyChartDefaults();
+}
+
+/* Read CSS variables for charts */
+function cssVar(name){
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+function applyChartDefaults(){
+  if (!window.Chart) return;
+  const text = cssVar("--chart-text") || "rgba(15,23,42,.85)";
+  const grid = cssVar("--chart-grid") || "rgba(15,23,42,.12)";
+  Chart.defaults.color = text;
+  Chart.defaults.borderColor = grid;
+}
+
+/* ------------------------- */
+/* rest of original code     */
+/* ------------------------- */
+
 function showToast(msg){
   const el = $("toast");
   el.textContent = msg;
@@ -227,15 +500,15 @@ function renderKPIs(){
   $("kpiBN").textContent = formatNum(rows.filter(r=>r.collab_type==="BN").length);
   $("kpiBS").textContent = formatNum(rows.filter(r=>r.collab_type==="BS").length);
 
-  // BB only meaningful in FULL
   const bb = rows.filter(r=>r.collab_type==="BB").length;
   $("kpiBB") ? ($("kpiBB").textContent = formatNum(bb)) : null;
 }
 
 function renderCharts(){
+  applyChartDefaults(); // ensure theme colors for tick/grid
+
   const rows = STATE.filtered;
 
-  // Collaboration chart
   const cCounts = computeCounts(rows, "collab_type");
   chartDestroySafe(STATE.charts.collab);
   STATE.charts.collab = new Chart($("chartCollab"), {
@@ -244,7 +517,6 @@ function renderCharts(){
     options: { responsive:true, plugins:{ legend:{ display:false } }, scales:{ x:{ grid:{display:false}}, y:{ beginAtZero:true } } }
   });
 
-  // ESG chart
   const eCounts = computeCounts(rows, "esg_block");
   chartDestroySafe(STATE.charts.esg);
   STATE.charts.esg = new Chart($("chartESG"), {
@@ -253,7 +525,6 @@ function renderCharts(){
     options: { responsive:true, plugins:{ legend:{ display:false } }, scales:{ x:{ grid:{display:false}}, y:{ beginAtZero:true } } }
   });
 
-  // Theme chart (top 12)
   const tCounts = computeCounts(rows, "theme_tag").slice(0,12);
   chartDestroySafe(STATE.charts.theme);
   STATE.charts.theme = new Chart($("chartTheme"), {
@@ -262,7 +533,6 @@ function renderCharts(){
     options: { indexAxis:"y", responsive:true, plugins:{ legend:{ display:false } }, scales:{ x:{ beginAtZero:true }, y:{ grid:{ display:false } } } }
   });
 
-  // Mechanism chart (precomputed from CLEAN subset)
   const mech = STATE.mech || [];
   chartDestroySafe(STATE.charts.mechanism);
   STATE.charts.mechanism = new Chart($("chartMechanism"), {
@@ -271,7 +541,6 @@ function renderCharts(){
     options: { indexAxis:"y", responsive:true, plugins:{ legend:{ display:false } }, scales:{ x:{ beginAtZero:true }, y:{ grid:{ display:false } } } }
   });
 
-  // Partner stacked (precomputed from CLEAN subset; counts are edges/mentions)
   const partner = STATE.partner || [];
   const collabs = uniq(partner.map(r=>r.collab_type_short));
   const ptypes = uniq(partner.map(r=>r.partner_type));
@@ -318,7 +587,7 @@ function renderTopPatterns(){
             <span class="badge">${safeStr(r.dominant_partner_type) || "—"}</span>
           </div>
         </div>
-        <button class="btn btn-primary" data-cluster="${safeStr(r.cluster_id)}">View examples</button>
+        <button class="btn btn-primary" data-cluster="${safeStr(r.cluster_id)}">${t("view_examples")}</button>
       </div>
       <div class="mt-3 text-sm"><span class="muted">Top theme:</span> ${safeStr(r.top_theme) || "NOT STATED"}</div>
       <div class="mt-2 text-sm"><span class="muted">Mechanisms:</span> ${safeStr(r.top_mechanisms) || "NOT STATED"}</div>
@@ -351,17 +620,17 @@ function renderExamplesModal(clusterId){
 
   if (STATE.datasetMode !== "CLEAN (111)"){
     modalBody.innerHTML = `
-      <div class="muted">Pattern clusters are computed on CLEAN (111). Switch dataset to CLEAN to browse cluster-filtered initiatives.</div>
-      <div class="mt-3 text-sm"><span class="muted">Examples (from summary):</span><br>${top ? safeStr(top.example_initiatives_with_evidence) : "NOT FOUND"}</div>
+      <div class="muted">${t("patterns_only_clean_note")}</div>
+      <div class="mt-3 text-sm"><span class="muted">${t("examples_summary_label")}</span><br>${top ? safeStr(top.example_initiatives_with_evidence) : "NOT FOUND"}</div>
     `;
     return;
   }
 
   const rows = STATE.filtered.filter(r => safeStr(r.cluster_id) === cid).slice(0, 25);
   const parts = [];
-  parts.push(`<div class="text-sm muted">Showing up to 25 initiatives in this pattern (filtered).</div>`);
+  parts.push(`<div class="text-sm muted">${t("examples_limit_note")}</div>`);
   if (top && safeStr(top.example_initiatives_with_evidence)){
-    parts.push(`<div class="mt-2 text-sm"><span class="muted">Summary examples:</span> ${safeStr(top.example_initiatives_with_evidence)}</div>`);
+    parts.push(`<div class="mt-2 text-sm"><span class="muted">${t("examples_summary_label")}</span> ${safeStr(top.example_initiatives_with_evidence)}</div>`);
   }
   parts.push("<div class='hr my-3'></div>");
 
@@ -378,9 +647,9 @@ function renderExamplesModal(clusterId){
           </div>
         </div>
         <div class="mt-2 text-sm">${r.initiative_title || "(no title)"}</div>
-        <div class="mt-2 text-xs muted">Evidence: ${cite}</div>
+        <div class="mt-2 text-xs muted">${t("evidence_label")} ${cite}</div>
         <div class="mt-2">
-          <button class="btn btn-primary" data-copy="${encodeURIComponent(cite)}">Copy citation</button>
+          <button class="btn btn-primary" data-copy="${encodeURIComponent(cite)}">${t("btn_copy")}</button>
         </div>
       </div>
     `);
@@ -390,8 +659,8 @@ function renderExamplesModal(clusterId){
   modalBody.querySelectorAll("button[data-copy]").forEach(b => {
     b.addEventListener("click", async ()=>{
       const txt = decodeURIComponent(b.getAttribute("data-copy"));
-      try{ await navigator.clipboard.writeText(txt); showToast("Copied."); }
-      catch(e){ showToast("Copy failed."); }
+      try{ await navigator.clipboard.writeText(txt); showToast(t("toast_copied")); }
+      catch(e){ showToast(t("toast_copy_failed")); }
     });
   });
 }
@@ -426,7 +695,7 @@ function renderTable(){
       <td class="text-xs">${r.evidence_file_name}<br><span class="muted">p${r.evidence_page}</span></td>
       <td class="text-xs muted">${r.evidence_quote_15w || ""}</td>
       <td class="text-xs">
-        <button class="btn btn-primary" data-copy="${encodeURIComponent(cite)}">Copy</button>
+        <button class="btn btn-primary" data-copy="${encodeURIComponent(cite)}">${t("btn_copy")}</button>
       </td>
     `;
     tbody.appendChild(tr);
@@ -435,15 +704,15 @@ function renderTable(){
   tbody.querySelectorAll("button[data-copy]").forEach(b => {
     b.addEventListener("click", async ()=>{
       const txt = decodeURIComponent(b.getAttribute("data-copy"));
-      try{ await navigator.clipboard.writeText(txt); showToast("Copied."); }
-      catch(e){ showToast("Copy failed."); }
+      try{ await navigator.clipboard.writeText(txt); showToast(t("toast_copied")); }
+      catch(e){ showToast(t("toast_copy_failed")); }
     });
   });
 }
 
 function downloadFiltered(){
   const rows = STATE.filtered;
-  if (!rows.length){ showToast("No rows to download."); return; }
+  if (!rows.length){ showToast(t("toast_no_rows")); return; }
 
   const cols = [
     "dataset","initiative_id","report_id","company","industry_sector","ownership_type","year_of_report",
@@ -471,8 +740,8 @@ function downloadFiltered(){
 function renderAll(){
   $("datasetNote").textContent =
     STATE.datasetMode === "FULL (501)"
-      ? "FULL dataset selected (501 rows). Pattern summaries/mechanisms/partner-types are computed on CLEAN subset."
-      : "CLEAN subset selected (111 rows). Pattern summaries/mechanisms/partner-types align to this subset.";
+      ? t("dataset_note_full")
+      : t("dataset_note_clean");
 
   renderKPIs();
   renderCharts();
@@ -561,12 +830,12 @@ function setupFiltersOnce(allClean, allFull){
     });
   }
 
-  fillSelect("collabFilter", collab, "Collaboration type");
-  fillSelect("esgFilter", esg, "ESG block");
-  fillSelect("sectorFilter", sector, "Industry sector");
-  fillSelect("themeFilter", theme, "Theme tag");
-  fillSelect("companyFilter", company, "Company");
-  fillSelect("clusterFilter", cluster, "Cluster (clean only)");
+  fillSelect("collabFilter", collab, t("filter_collab"));
+  fillSelect("esgFilter", esg, t("filter_esg"));
+  fillSelect("sectorFilter", sector, t("filter_sector"));
+  fillSelect("themeFilter", theme, t("filter_theme"));
+  fillSelect("companyFilter", company, t("filter_company"));
+  fillSelect("clusterFilter", cluster, t("filter_cluster"));
 
   STATE.choices.collab = STATE.choices["collabFilter"];
   STATE.choices.esg = STATE.choices["esgFilter"];
@@ -575,7 +844,6 @@ function setupFiltersOnce(allClean, allFull){
   STATE.choices.company = STATE.choices["companyFilter"];
   STATE.choices.cluster = STATE.choices["clusterFilter"];
 
-  // default selections
   STATE.choices.collab.setChoiceByValue(collab);
   STATE.choices.esg.setChoiceByValue(esg);
 
@@ -588,7 +856,6 @@ function setupFiltersOnce(allClean, allFull){
   $("datasetMode").addEventListener("change", ()=>{
     STATE.datasetMode = $("datasetMode").value;
 
-    // FULL has no cluster ids -> clear cluster filter
     if (STATE.datasetMode === "FULL (501)" && STATE.choices.cluster){
       STATE.choices.cluster.removeActiveItems();
     }
@@ -615,7 +882,7 @@ function setupFiltersOnce(allClean, allFull){
     $("pageNum").value = 1;
 
     filterRows();
-    showToast("Filters reset.");
+    showToast(t("toast_reset"));
   });
 
   $("downloadBtn").addEventListener("click", downloadFiltered);
@@ -635,9 +902,68 @@ function setupFiltersOnce(allClean, allFull){
   $("examplesBackdrop").addEventListener("click", ()=> $("examplesModal").classList.add("hidden"));
 }
 
+/* Language change (rebuild Choices placeholders safely) */
+function setLanguage(lang){
+  CURRENT_LANG = (lang === "ru") ? "ru" : "en";
+  localStorage.setItem("lang", CURRENT_LANG);
+  applyI18n();
+
+  // update theme label (depends on language)
+  applyTheme(CURRENT_THEME);
+
+  // rebuild Choices selects to update placeholder strings, keep selections
+  if (STATE.allClean.length || STATE.allFull.length){
+    const saved = {
+      collab: STATE.choices.collab?.getValue(true) || [],
+      esg: STATE.choices.esg?.getValue(true) || [],
+      sector: STATE.choices.sector?.getValue(true) || [],
+      theme: STATE.choices.theme?.getValue(true) || [],
+      company: STATE.choices.company?.getValue(true) || [],
+      cluster: STATE.choices.cluster?.getValue(true) || [],
+    };
+
+    setupFiltersOnce(STATE.allClean, STATE.allFull);
+
+    // restore selections
+    if (saved.collab.length) STATE.choices.collab.setChoiceByValue(saved.collab);
+    if (saved.esg.length) STATE.choices.esg.setChoiceByValue(saved.esg);
+    if (saved.sector.length) STATE.choices.sector.setChoiceByValue(saved.sector);
+    if (saved.theme.length) STATE.choices.theme.setChoiceByValue(saved.theme);
+    if (saved.company.length) STATE.choices.company.setChoiceByValue(saved.company);
+    if (STATE.datasetMode === "CLEAN (111)" && saved.cluster.length) STATE.choices.cluster.setChoiceByValue(saved.cluster);
+  }
+
+  renderAll();
+}
+
+/* Theme toggle handler */
+function toggleTheme(){
+  const next = (CURRENT_THEME === "dark") ? "light" : "dark";
+  localStorage.setItem("theme", next);
+  applyTheme(next);
+
+  // re-render charts so ticks/grid are correct immediately
+  renderCharts();
+}
+
 async function main(){
   setLoading(true);
   try{
+    // init language/theme before render
+    const savedLang = localStorage.getItem("lang");
+    const autoLang = (navigator.language || "").toLowerCase().startsWith("ru") ? "ru" : "en";
+    CURRENT_LANG = (savedLang === "ru" || savedLang === "en") ? savedLang : autoLang;
+    $("langToggle").value = CURRENT_LANG;
+    applyI18n();
+
+    const savedTheme = localStorage.getItem("theme");
+    const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const initTheme = (savedTheme === "dark" || savedTheme === "light") ? savedTheme : (prefersDark ? "dark" : "light");
+    applyTheme(initTheme);
+
+    $("themeToggle").addEventListener("click", toggleTheme);
+    $("langToggle").addEventListener("change", ()=> setLanguage($("langToggle").value));
+
     const [
       companyRows,
       clusterAssignRows,
