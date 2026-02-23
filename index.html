@@ -28,8 +28,8 @@
     <div class="card p-6 flex items-center gap-4">
       <div class="spinner"></div>
       <div>
-        <div class="font-semibold">Loading dashboard…</div>
-        <div class="muted text-sm mt-1">Reading CSVs from /data and building visuals.</div>
+        <div class="font-semibold" data-i18n="loading_title">Loading dashboard…</div>
+        <div class="muted text-sm mt-1" data-i18n="loading_sub">Reading CSVs from /data and building visuals.</div>
       </div>
     </div>
   </div>
@@ -45,27 +45,39 @@
       <div class="flex items-center gap-3">
         <img src="./assets/logo.svg" alt="logo" class="h-10 w-10 rounded-2xl" />
         <div>
-          <div class="text-lg font-semibold leading-tight">China ESG Collaboration Dashboard</div>
-          <div class="text-sm muted leading-tight">
+          <div class="text-lg font-semibold leading-tight" data-i18n="app_title">China ESG Collaboration Dashboard</div>
+          <div class="text-sm muted leading-tight" data-i18n="app_subtitle">
             Evidence-backed ESG initiative analytics (Clean subset + Full extraction)
           </div>
         </div>
       </div>
 
       <div class="flex items-center gap-2">
-        <a class="btn" href="#library" title="Jump to evidence table">Evidence library</a>
-        <a class="btn btn-primary" href="#patterns" title="Jump to patterns">Patterns</a>
+        <!-- Theme toggle -->
+        <button id="themeToggle" class="btn" type="button" title="Toggle day/night">
+          <span id="themeIcon" aria-hidden="true">🌙</span>
+          <span id="themeLabel" data-i18n="theme_night">Night</span>
+        </button>
+
+        <!-- Language toggle -->
+        <select id="langToggle" class="border border-slate-200 rounded-xl px-2 py-2 bg-white/80">
+          <option value="en">EN</option>
+          <option value="ru">RU</option>
+        </select>
+
+        <a class="btn" href="#library" title="Jump to evidence table" data-i18n="nav_library">Evidence library</a>
+        <a class="btn btn-primary" href="#patterns" title="Jump to patterns" data-i18n="nav_patterns">Patterns</a>
       </div>
     </div>
   </header>
 
   <main class="mx-auto max-w-7xl px-4 py-6 space-y-6">
     <div id="fatalError" class="hidden card p-4 border border-red-200 bg-red-50">
-      <div class="font-semibold text-red-800">Dashboard failed to load</div>
-      <div class="text-sm text-red-700 mt-2">Error:</div>
+      <div class="font-semibold text-red-800" data-i18n="fatal_title">Dashboard failed to load</div>
+      <div class="text-sm text-red-700 mt-2" data-i18n="fatal_error_label">Error:</div>
       <pre id="fatalErrorText" class="text-xs mt-2 whitespace-pre-wrap"></pre>
-      <div class="text-sm text-red-800 mt-3">
-        Check that all required CSV files exist in <code>/data</code> and are committed to GitHub Pages.
+      <div class="text-sm text-red-800 mt-3" data-i18n="fatal_hint">
+        Check that all required CSV files exist in /data and are committed to GitHub Pages.
       </div>
     </div>
 
@@ -73,7 +85,7 @@
     <section class="card p-4">
       <div class="flex flex-col lg:flex-row lg:items-end gap-4">
         <div class="flex-1">
-          <div class="text-sm muted">Dataset</div>
+          <div class="text-sm muted" data-i18n="filter_dataset">Dataset</div>
           <select id="datasetMode" class="w-full">
             <option value="CLEAN (111)">CLEAN (111)</option>
             <option value="FULL (501)">FULL (501)</option>
@@ -82,58 +94,58 @@
         </div>
 
         <div class="flex-1">
-          <div class="text-sm muted">Collaboration type</div>
+          <div class="text-sm muted" data-i18n="filter_collab">Collaboration type</div>
           <select id="collabFilter" multiple class="w-full"></select>
         </div>
 
         <div class="flex-1">
-          <div class="text-sm muted">ESG block</div>
+          <div class="text-sm muted" data-i18n="filter_esg">ESG block</div>
           <select id="esgFilter" multiple class="w-full"></select>
         </div>
 
         <div class="flex-1">
-          <div class="text-sm muted">Industry sector</div>
+          <div class="text-sm muted" data-i18n="filter_sector">Industry sector</div>
           <select id="sectorFilter" multiple class="w-full"></select>
         </div>
       </div>
 
       <div class="mt-4 grid grid-cols-1 lg:grid-cols-5 gap-4">
         <div>
-          <div class="text-sm muted">Theme tag</div>
+          <div class="text-sm muted" data-i18n="filter_theme">Theme tag</div>
           <select id="themeFilter" multiple class="w-full"></select>
         </div>
 
         <div>
-          <div class="text-sm muted">Company</div>
+          <div class="text-sm muted" data-i18n="filter_company">Company</div>
           <select id="companyFilter" multiple class="w-full"></select>
         </div>
 
         <div>
-          <div class="text-sm muted">Cluster (clean only)</div>
+          <div class="text-sm muted" data-i18n="filter_cluster">Cluster (clean only)</div>
           <select id="clusterFilter" multiple class="w-full"></select>
         </div>
 
         <div>
-          <div class="text-sm muted">KPI present</div>
+          <div class="text-sm muted" data-i18n="filter_kpi">KPI present</div>
           <select id="kpiFilter" class="w-full border border-slate-200 rounded-xl px-3 py-2 bg-white/80">
-            <option value="ALL">All</option>
+            <option value="ALL" data-i18n="kpi_all">All</option>
             <option value="YES">YES</option>
             <option value="NO">NO</option>
-            <option value="NOT STATED">NOT STATED</option>
+            <option value="NOT STATED" data-i18n="kpi_not_stated">NOT STATED</option>
           </select>
         </div>
 
         <div>
-          <div class="text-sm muted">Search</div>
+          <div class="text-sm muted" data-i18n="filter_search">Search</div>
           <input id="searchBox" type="text" placeholder="title / evidence / actors…"
                  class="w-full border border-slate-200 rounded-xl px-3 py-2 bg-white/80" />
         </div>
       </div>
 
       <div class="mt-4 flex flex-wrap items-center gap-2">
-        <button id="resetBtn" class="btn btn-danger">Reset filters</button>
-        <button id="downloadBtn" class="btn btn-primary">Download filtered CSV</button>
-        <div class="text-xs muted">
+        <button id="resetBtn" class="btn btn-danger" data-i18n="btn_reset">Reset filters</button>
+        <button id="downloadBtn" class="btn btn-primary" data-i18n="btn_download">Download filtered CSV</button>
+        <div class="text-xs muted" data-i18n="note_precomputed">
           Notes: patterns/mechanisms/partner-types are precomputed on the clean subset.
         </div>
       </div>
@@ -142,11 +154,11 @@
     <!-- KPIs -->
     <section class="grid grid-cols-2 lg:grid-cols-5 gap-4">
       <div class="kpi p-4">
-        <div class="text-xs muted">Initiatives (filtered)</div>
+        <div class="text-xs muted" data-i18n="kpi_inits">Initiatives (filtered)</div>
         <div id="kpiInitiatives" class="text-2xl font-semibold mt-1">0</div>
       </div>
       <div class="kpi p-4">
-        <div class="text-xs muted">Companies (filtered)</div>
+        <div class="text-xs muted" data-i18n="kpi_companies">Companies (filtered)</div>
         <div id="kpiCompanies" class="text-2xl font-semibold mt-1">0</div>
       </div>
       <div class="kpi p-4">
@@ -160,50 +172,50 @@
       <div class="kpi p-4">
         <div class="text-xs muted">BS</div>
         <div id="kpiBS" class="text-2xl font-semibold mt-1">0</div>
-        <div class="text-xs muted mt-2">BB shown in KPIs only when present</div>
+        <div class="text-xs muted mt-2" data-i18n="kpi_bb_note">BB shown in KPIs only when present</div>
       </div>
     </section>
 
     <!-- Tabs -->
     <section class="card p-4">
       <div class="flex flex-wrap gap-2">
-        <button id="tabOverview" class="tab active">Overview</button>
-        <button id="tabPatterns" class="tab">Patterns</button>
-        <button id="tabLibrary" class="tab">Initiative library</button>
-        <button id="tabMethods" class="tab">Method & definitions</button>
+        <button id="tabOverview" class="tab active" data-i18n="tab_overview">Overview</button>
+        <button id="tabPatterns" class="tab" data-i18n="tab_patterns">Patterns</button>
+        <button id="tabLibrary" class="tab" data-i18n="tab_library">Initiative library</button>
+        <button id="tabMethods" class="tab" data-i18n="tab_methods">Method & definitions</button>
       </div>
 
       <!-- Overview panel -->
       <div id="panelOverview" class="mt-4 space-y-5">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div class="card p-4">
-            <div class="font-semibold">Initiatives by collaboration type</div>
-            <div class="text-xs muted mt-1">Computed from selected dataset (clean/full).</div>
+            <div class="font-semibold" data-i18n="ov_collab_title">Initiatives by collaboration type</div>
+            <div class="text-xs muted mt-1" data-i18n="ov_collab_sub">Computed from selected dataset (clean/full).</div>
             <canvas id="chartCollab" class="mt-3"></canvas>
           </div>
           <div class="card p-4">
-            <div class="font-semibold">Initiatives by ESG block</div>
-            <div class="text-xs muted mt-1">Computed from selected dataset (clean/full).</div>
+            <div class="font-semibold" data-i18n="ov_esg_title">Initiatives by ESG block</div>
+            <div class="text-xs muted mt-1" data-i18n="ov_esg_sub">Computed from selected dataset (clean/full).</div>
             <canvas id="chartESG" class="mt-3"></canvas>
           </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div class="card p-4">
-            <div class="font-semibold">Top theme tags (filtered)</div>
-            <div class="text-xs muted mt-1">Computed from selected dataset (clean/full).</div>
+            <div class="font-semibold" data-i18n="ov_theme_title">Top theme tags (filtered)</div>
+            <div class="text-xs muted mt-1" data-i18n="ov_theme_sub">Computed from selected dataset (clean/full).</div>
             <canvas id="chartTheme" class="mt-3"></canvas>
           </div>
           <div class="card p-4">
-            <div class="font-semibold">Mechanism signals (precomputed)</div>
-            <div class="text-xs muted mt-1">From patterns_mechanism_counts.csv (clean subset).</div>
+            <div class="font-semibold" data-i18n="ov_mech_title">Mechanism signals (precomputed)</div>
+            <div class="text-xs muted mt-1" data-i18n="ov_mech_sub">From patterns_mechanism_counts.csv (clean subset).</div>
             <canvas id="chartMechanism" class="mt-3"></canvas>
           </div>
         </div>
 
         <div class="card p-4">
-          <div class="font-semibold">Partner types by collaboration type (precomputed)</div>
-          <div class="text-xs muted mt-1">
+          <div class="font-semibold" data-i18n="ov_partner_title">Partner types by collaboration type (precomputed)</div>
+          <div class="text-xs muted mt-1" data-i18n="ov_partner_sub">
             From patterns_partner_types_from_initiatives.csv. Counts are partner edges/mentions, not initiative counts.
           </div>
           <canvas id="chartPartner" class="mt-3"></canvas>
@@ -214,8 +226,8 @@
       <div id="panelPatterns" class="hidden mt-4 space-y-4">
         <div id="patterns" class="flex items-center justify-between gap-3">
           <div>
-            <div class="text-lg font-semibold">Top patterns (10)</div>
-            <div class="text-sm muted">
+            <div class="text-lg font-semibold" data-i18n="pat_top_title">Top patterns (10)</div>
+            <div class="text-sm muted" data-i18n="pat_top_sub">
               From generic_patterns_brief_top10.csv. Click “View examples” to open evidence-backed entries.
             </div>
           </div>
@@ -227,13 +239,13 @@
       <div id="panelLibrary" class="hidden mt-4 space-y-4">
         <div id="library" class="flex items-center justify-between gap-3">
           <div>
-            <div class="text-lg font-semibold">Evidence-backed initiative library</div>
-            <div class="text-sm muted">
+            <div class="text-lg font-semibold" data-i18n="lib_title">Evidence-backed initiative library</div>
+            <div class="text-sm muted" data-i18n="lib_sub">
               Each row includes file + page + 15-word evidence quote. Use filters above to narrow.
             </div>
           </div>
           <div class="flex items-center gap-2">
-            <label class="text-sm muted">Rows/page</label>
+            <label class="text-sm muted" data-i18n="lib_rows_per_page">Rows/page</label>
             <select id="pageSize" class="border border-slate-200 rounded-xl px-2 py-2 bg-white/80">
               <option>10</option>
               <option selected>20</option>
@@ -246,10 +258,10 @@
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div class="text-sm muted" id="pageInfo">Page 1 / 1</div>
           <div class="flex items-center gap-2">
-            <button id="pagePrev" class="btn">Prev</button>
+            <button id="pagePrev" class="btn" data-i18n="btn_prev">Prev</button>
             <input id="pageNum" type="number" min="1" value="1"
                    class="w-20 border border-slate-200 rounded-xl px-2 py-2 bg-white/80" />
-            <button id="pageNext" class="btn">Next</button>
+            <button id="pageNext" class="btn" data-i18n="btn_next">Next</button>
           </div>
         </div>
 
@@ -257,17 +269,17 @@
           <table>
             <thead>
               <tr>
-                <th>ID</th>
-                <th>Company</th>
-                <th>Collab</th>
-                <th>ESG</th>
-                <th>Theme</th>
-                <th>Title</th>
-                <th>KPI</th>
-                <th>Geo</th>
-                <th>Evidence</th>
-                <th>Quote (15w)</th>
-                <th>Copy cite</th>
+                <th data-i18n="th_id">ID</th>
+                <th data-i18n="th_company">Company</th>
+                <th data-i18n="th_collab">Collab</th>
+                <th data-i18n="th_esg">ESG</th>
+                <th data-i18n="th_theme">Theme</th>
+                <th data-i18n="th_title">Title</th>
+                <th data-i18n="th_kpi">KPI</th>
+                <th data-i18n="th_geo">Geo</th>
+                <th data-i18n="th_evidence">Evidence</th>
+                <th data-i18n="th_quote">Quote (15w)</th>
+                <th data-i18n="th_copy">Copy cite</th>
               </tr>
             </thead>
             <tbody id="tableBody"></tbody>
@@ -277,25 +289,25 @@
 
       <!-- Methods panel -->
       <div id="panelMethods" class="hidden mt-4 space-y-3">
-        <div class="text-lg font-semibold">Method & definitions</div>
-        <div class="text-sm muted">
+        <div class="text-lg font-semibold" data-i18n="meth_title">Method & definitions</div>
+        <div class="text-sm muted" data-i18n="meth_sub">
           This dashboard reads the exported CSVs. It does not re-parse PDFs in the browser.
         </div>
         <div class="card p-4 text-sm space-y-2">
-          <div class="font-semibold">Datasets</div>
+          <div class="font-semibold" data-i18n="meth_datasets">Datasets</div>
           <ul class="list-disc ml-6 space-y-1">
-            <li><b>CLEAN (111)</b>: evidence-backed subset used for clustering/pattern mining (<code>data/initiatives.csv</code>).</li>
-            <li><b>FULL (501)</b>: broader extraction including BB and multi-actor records (<code>data/initiatives2.csv</code>).</li>
+            <li data-i18n="meth_clean">CLEAN (111): evidence-backed subset used for clustering/pattern mining (data/initiatives.csv).</li>
+            <li data-i18n="meth_full">FULL (501): broader extraction including BB and multi-actor records (data/initiatives2.csv).</li>
           </ul>
           <div class="hr my-3"></div>
-          <div><b>Slide consistency rule:</b> initiative counts ≠ partner edge counts. One initiative can name multiple partners.</div>
-          <div><b>Precomputed files:</b> mechanisms, partner-type distribution, and top patterns are computed on CLEAN subset.</div>
-          <div><b>Auditability:</b> initiative rows preserve evidence (file, page, 15-word quote, excerpt).</div>
+          <div data-i18n="meth_rule1"><b>Slide consistency rule:</b> initiative counts ≠ partner edge counts. One initiative can name multiple partners.</div>
+          <div data-i18n="meth_rule2"><b>Precomputed files:</b> mechanisms, partner-type distribution, and top patterns are computed on CLEAN subset.</div>
+          <div data-i18n="meth_rule3"><b>Auditability:</b> initiative rows preserve evidence (file, page, 15-word quote, excerpt).</div>
         </div>
       </div>
     </section>
 
-    <footer class="py-6 text-xs muted text-center">
+    <footer class="py-6 text-xs muted text-center" data-i18n="footer">
       Static dashboard optimized for GitHub Pages • BRICS+ intersectional collaboration (China pilot)
     </footer>
   </main>
@@ -307,10 +319,10 @@
       <div class="card max-w-4xl w-full p-4">
         <div class="flex items-center justify-between gap-3">
           <div>
-            <div class="text-sm muted">Pattern examples</div>
+            <div class="text-sm muted" data-i18n="modal_sub">Pattern examples</div>
             <div id="examplesTitle" class="text-lg font-semibold">—</div>
           </div>
-          <button id="modalClose" class="btn">Close</button>
+          <button id="modalClose" class="btn" data-i18n="btn_close">Close</button>
         </div>
         <div id="examplesBody" class="mt-4 max-h-[70vh] overflow-auto pr-1"></div>
       </div>
