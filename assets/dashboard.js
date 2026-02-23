@@ -234,7 +234,6 @@ function t(key){
 function applyI18n(){
   document.querySelectorAll("[data-i18n]").forEach(el=>{
     const key = el.getAttribute("data-i18n");
-    // Some entries include HTML (methods rules) -> set as HTML; otherwise text.
     const val = t(key);
     if (key.startsWith("meth_rule")) {
       el.innerHTML = val;
@@ -243,13 +242,60 @@ function applyI18n(){
     }
   });
 
-  // placeholders not controlled by data-i18n
   const sb = $("searchBox");
   if (sb) sb.placeholder = t("search_placeholder");
 
-  // update toast default text (hidden state)
   const toast = $("toast");
   if (toast && toast.classList.contains("hidden")) toast.textContent = t("toast_copied");
+}
+
+/* ------------------------- */
+/* UI-only mapping BG/BN/BS/BB (data unchanged) */
+/* ------------------------- */
+const COLLAB_SHORT_DESC = {
+  en: {
+    BG: "Government",
+    BN: "NGO/Public",
+    BS: "Society/Community",
+    BB: "Business",
+  },
+  ru: {
+    BG: "Государство",
+    BN: "НКО/публичн.",
+    BS: "Общество/сообщества",
+    BB: "Бизнес",
+  }
+};
+
+const COLLAB_LONG_DESC = {
+  en: {
+    BG: "Business–Government",
+    BN: "Business–NGO/Public organizations",
+    BS: "Business–Society/Communities",
+    BB: "Business–Business (partners/supply chain/peers)",
+  },
+  ru: {
+    BG: "Бизнес–государство",
+    BN: "Бизнес–НКО/публичные организации",
+    BS: "Бизнес–общество/сообщества",
+    BB: "Бизнес–бизнес (партнёры/цепочки поставок/коллеги)",
+  }
+};
+
+function collabLabelAxis(code){
+  const c = String(code || "").trim();
+  const short = (COLLAB_SHORT_DESC[CURRENT_LANG] && COLLAB_SHORT_DESC[CURRENT_LANG][c]) || "";
+  return short ? `${c} (${short})` : (c || "NOT STATED");
+}
+function collabLabelLong(code){
+  const c = String(code || "").trim();
+  const long = (COLLAB_LONG_DESC[CURRENT_LANG] && COLLAB_LONG_DESC[CURRENT_LANG][c]) || "";
+  return long ? `${c} — ${long}` : (c || "NOT STATED");
+}
+function collabTitleAttr(code){
+  const c = String(code || "").trim();
+  const long = (COLLAB_LONG_DESC[CURRENT_LANG] && COLLAB_LONG_DESC[CURRENT_LANG][c]) || "";
+  return long ? `${c} — ${long}` : (c || "");
 }
 
 /* ------------------------- */
@@ -260,7 +306,6 @@ function applyTheme(theme){
   CURRENT_THEME = theme === "dark" ? "dark" : "light";
   document.documentElement.setAttribute("data-theme", CURRENT_THEME);
 
-  // Toggle button text/icon
   const icon = $("themeIcon");
   const label = $("themeLabel");
   if (CURRENT_THEME === "dark"){
@@ -271,7 +316,6 @@ function applyTheme(theme){
     if (label) label.textContent = t("theme_night");
   }
 
-  // Apply chart defaults (ticks/grid) so dark mode is readable
   applyChartDefaults();
 }
 
@@ -505,18 +549,22 @@ function renderKPIs(){
 }
 
 function renderCharts(){
-  applyChartDefaults(); // ensure theme colors for tick/grid
+  applyChartDefaults();
 
   const rows = STATE.filtered;
 
+  // Collab chart (translate labels UI-only)
   const cCounts = computeCounts(rows, "collab_type");
+  const cLabels = cCounts.map(x => collabLabelAxis(x.k));
+
   chartDestroySafe(STATE.charts.collab);
   STATE.charts.collab = new Chart($("chartCollab"), {
     type: "bar",
-    data: { labels: cCounts.map(x=>x.k), datasets: [{ label:"Initiatives", data: cCounts.map(x=>x.v) }] },
+    data: { labels: cLabels, datasets: [{ label:"Initiatives", data: cCounts.map(x=>x.v) }] },
     options: { responsive:true, plugins:{ legend:{ display:false } }, scales:{ x:{ grid:{display:false}}, y:{ beginAtZero:true } } }
   });
 
+  // ESG chart (unchanged)
   const eCounts = computeCounts(rows, "esg_block");
   chartDestroySafe(STATE.charts.esg);
   STATE.charts.esg = new Chart($("chartESG"), {
@@ -525,6 +573,7 @@ function renderCharts(){
     options: { responsive:true, plugins:{ legend:{ display:false } }, scales:{ x:{ grid:{display:false}}, y:{ beginAtZero:true } } }
   });
 
+  // Theme chart (unchanged)
   const tCounts = computeCounts(rows, "theme_tag").slice(0,12);
   chartDestroySafe(STATE.charts.theme);
   STATE.charts.theme = new Chart($("chartTheme"), {
@@ -533,6 +582,7 @@ function renderCharts(){
     options: { indexAxis:"y", responsive:true, plugins:{ legend:{ display:false } }, scales:{ x:{ beginAtZero:true }, y:{ grid:{ display:false } } } }
   });
 
+  // Mechanism chart (precomputed, unchanged)
   const mech = STATE.mech || [];
   chartDestroySafe(STATE.charts.mechanism);
   STATE.charts.mechanism = new Chart($("chartMechanism"), {
@@ -541,14 +591,16 @@ function renderCharts(){
     options: { indexAxis:"y", responsive:true, plugins:{ legend:{ display:false } }, scales:{ x:{ beginAtZero:true }, y:{ grid:{ display:false } } } }
   });
 
+  // Partner chart (x-axis translated UI-only)
   const partner = STATE.partner || [];
-  const collabs = uniq(partner.map(r=>r.collab_type_short));
+  const collabCodes = uniq(partner.map(r=>r.collab_type_short));
+  const collabLabels = collabCodes.map(c => collabLabelAxis(c));
   const ptypes = uniq(partner.map(r=>r.partner_type));
 
   const datasets = ptypes.map(pt => ({
     label: pt,
-    data: collabs.map(c => {
-      const row = partner.find(r => safeStr(r.collab_type_short)===c && safeStr(r.partner_type)===pt);
+    data: collabCodes.map(code => {
+      const row = partner.find(r => safeStr(r.collab_type_short)===code && safeStr(r.partner_type)===pt);
       return row ? toInt(row.count) : 0;
     }),
     stack: "stack1",
@@ -557,7 +609,7 @@ function renderCharts(){
   chartDestroySafe(STATE.charts.partner);
   STATE.charts.partner = new Chart($("chartPartner"), {
     type: "bar",
-    data: { labels: collabs, datasets },
+    data: { labels: collabLabels, datasets },
     options: {
       responsive:true,
       plugins:{ legend:{ position:"bottom" } },
@@ -573,6 +625,9 @@ function renderTopPatterns(){
   const rows = STATE.top10 || [];
   for (const r of rows){
     const label = safeStr(r.pattern_label) || `Cluster ${safeStr(r.cluster_id)}`;
+    const collabCode = safeStr(r.dominant_collab_type);
+    const collabBadge = collabCode ? collabLabelAxis(collabCode) : "—";
+
     const card = document.createElement("div");
     card.className = "card p-4";
     card.innerHTML = `
@@ -582,7 +637,7 @@ function renderTopPatterns(){
           <div class="text-base font-semibold">${label}</div>
           <div class="mt-2 flex flex-wrap gap-2">
             <span class="badge">n=${safeStr(r.n)}</span>
-            <span class="badge">${safeStr(r.dominant_collab_type) || "—"}</span>
+            <span class="badge" title="${collabTitleAttr(collabCode)}">${collabBadge}</span>
             <span class="badge">${safeStr(r.dominant_esg_block) || "—"}</span>
             <span class="badge">${safeStr(r.dominant_partner_type) || "—"}</span>
           </div>
@@ -641,7 +696,7 @@ function renderExamplesModal(clusterId){
         <div class="flex items-start justify-between gap-2">
           <div class="font-semibold">${r.company}</div>
           <div class="flex gap-2">
-            <span class="badge">${r.collab_type}</span>
+            <span class="badge" title="${collabTitleAttr(r.collab_type)}">${collabLabelAxis(r.collab_type)}</span>
             <span class="badge">${r.esg_block}</span>
             <span class="badge">${r.theme_tag.replaceAll("_"," ")}</span>
           </div>
@@ -686,7 +741,7 @@ function renderTable(){
     tr.innerHTML = `
       <td class="text-xs">${r.initiative_id}</td>
       <td>${r.company}</td>
-      <td class="text-sm"><span class="badge">${r.collab_type}</span></td>
+      <td class="text-sm"><span class="badge" title="${collabTitleAttr(r.collab_type)}">${collabLabelAxis(r.collab_type)}</span></td>
       <td class="text-sm"><span class="badge">${r.esg_block}</span></td>
       <td class="text-xs">${r.theme_tag}</td>
       <td class="text-sm font-medium">${r.initiative_title || "(no title)"}</td>
@@ -810,13 +865,13 @@ function setupFiltersOnce(allClean, allFull){
   const company = uniq(pool.map(r=>r.company));
   const cluster = uniq(allClean.map(r=>r.cluster_id).filter(Boolean));
 
-  function fillSelect(id, options, placeholder){
+  function fillSelect(id, options, placeholder, labelFn){
     const sel = $(id);
     sel.innerHTML = "";
     for (const opt of options){
       const o = document.createElement("option");
       o.value = opt;
-      o.textContent = opt;
+      o.textContent = labelFn ? labelFn(opt) : opt;
       sel.appendChild(o);
     }
     if (STATE.choices[id]) STATE.choices[id].destroy();
@@ -830,7 +885,8 @@ function setupFiltersOnce(allClean, allFull){
     });
   }
 
-  fillSelect("collabFilter", collab, t("filter_collab"));
+  // collabFilter uses translated UI labels; values remain BG/BN/BS/BB
+  fillSelect("collabFilter", collab, t("filter_collab"), collabLabelLong);
   fillSelect("esgFilter", esg, t("filter_esg"));
   fillSelect("sectorFilter", sector, t("filter_sector"));
   fillSelect("themeFilter", theme, t("filter_theme"));
@@ -844,6 +900,7 @@ function setupFiltersOnce(allClean, allFull){
   STATE.choices.company = STATE.choices["companyFilter"];
   STATE.choices.cluster = STATE.choices["clusterFilter"];
 
+  // defaults: all collab + all esg selected
   STATE.choices.collab.setChoiceByValue(collab);
   STATE.choices.esg.setChoiceByValue(esg);
 
@@ -855,11 +912,9 @@ function setupFiltersOnce(allClean, allFull){
 
   $("datasetMode").addEventListener("change", ()=>{
     STATE.datasetMode = $("datasetMode").value;
-
     if (STATE.datasetMode === "FULL (501)" && STATE.choices.cluster){
       STATE.choices.cluster.removeActiveItems();
     }
-
     $("pageNum").value = 1;
     filterRows();
   });
@@ -902,7 +957,7 @@ function setupFiltersOnce(allClean, allFull){
   $("examplesBackdrop").addEventListener("click", ()=> $("examplesModal").classList.add("hidden"));
 }
 
-/* Language change (rebuild Choices placeholders safely) */
+/* Language change (rebuild Choices placeholders + translated BG/BN/BS labels safely) */
 function setLanguage(lang){
   CURRENT_LANG = (lang === "ru") ? "ru" : "en";
   localStorage.setItem("lang", CURRENT_LANG);
@@ -911,7 +966,7 @@ function setLanguage(lang){
   // update theme label (depends on language)
   applyTheme(CURRENT_THEME);
 
-  // rebuild Choices selects to update placeholder strings, keep selections
+  // rebuild selects so collab labels + placeholders update
   if (STATE.allClean.length || STATE.allFull.length){
     const saved = {
       collab: STATE.choices.collab?.getValue(true) || [],
@@ -924,7 +979,7 @@ function setLanguage(lang){
 
     setupFiltersOnce(STATE.allClean, STATE.allFull);
 
-    // restore selections
+    // restore selections (values are codes, unchanged)
     if (saved.collab.length) STATE.choices.collab.setChoiceByValue(saved.collab);
     if (saved.esg.length) STATE.choices.esg.setChoiceByValue(saved.esg);
     if (saved.sector.length) STATE.choices.sector.setChoiceByValue(saved.sector);
@@ -941,8 +996,6 @@ function toggleTheme(){
   const next = (CURRENT_THEME === "dark") ? "light" : "dark";
   localStorage.setItem("theme", next);
   applyTheme(next);
-
-  // re-render charts so ticks/grid are correct immediately
   renderCharts();
 }
 
