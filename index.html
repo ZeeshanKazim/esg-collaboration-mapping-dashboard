@@ -5,307 +5,130 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ESG Collaboration Mapping Dashboard</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="./styles.css" />
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- Plotly -->
-  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   <!-- PapaParse -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+  <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
-  <div class="app-shell">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="brand-card">
-        <div class="brand-top">
-          <div class="brand-dot"></div>
-          <div>
-            <h1 data-i18n="brandTitle">ESG Collaboration Mapping</h1>
-            <p data-i18n="brandSubtitle">Chinese companies • BRICS+ focus</p>
-          </div>
-        </div>
 
-        <div class="header-actions">
-          <button id="btnLang" class="btn btn-ghost" title="Language">RU</button>
-          <button id="btnTheme" class="btn btn-ghost" title="Theme">☾</button>
-        </div>
+<div class="app">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>ESG Mapping</h2>
+    </div>
+
+    <div class="filter-group">
+      <label>Dataset</label>
+      <select id="datasetToggle">
+        <option value="subset">111 Clean Subset</option>
+        <option value="full">501 Full Extraction</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Collaboration Type</label>
+      <select id="collabFilter">
+        <option value="ALL">All</option>
+        <option value="BN">BN</option>
+        <option value="BG">BG</option>
+        <option value="BS">BS</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>ESG Block</label>
+      <select id="esgFilter">
+        <option value="ALL">All</option>
+        <option value="E">E</option>
+        <option value="S">S</option>
+        <option value="G">G</option>
+        <option value="X">Cross</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Sector</label>
+      <select id="sectorFilter"></select>
+    </div>
+
+    <div class="sidebar-footer">
+      <button id="resetBtn">Reset</button>
+    </div>
+  </aside>
+
+
+  <!-- Main Content -->
+  <main class="main">
+
+    <header class="topbar">
+      <div>
+        <h1 id="title">ESG Collaboration Mapping</h1>
+        <p id="subtitle">Chinese Companies • BRICS+ Focus</p>
       </div>
 
-      <div class="panel">
-        <div class="panel-title" data-i18n="scopeTitle">Dataset Scope</div>
-        <div class="scope-switch">
-          <button id="scopeSubset" class="btn btn-scope active" data-scope="subset">
-            <span data-i18n="scopeSubset">Subset (111)</span>
-          </button>
-          <button id="scopeFull" class="btn btn-scope" data-scope="full">
-            <span data-i18n="scopeFull">Full (501)</span>
-          </button>
-        </div>
-        <div id="scopeNote" class="muted-note" data-i18n="scopeNoteSubset">
-          Using the cleaned subset for pattern analysis.
-        </div>
+      <div class="top-actions">
+        <button id="langToggle">RU</button>
+        <button id="darkToggle">🌙</button>
+      </div>
+    </header>
+
+    <!-- KPI Cards -->
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <span id="kpiInitiatives">0</span>
+        <label>Initiatives</label>
+      </div>
+      <div class="kpi-card">
+        <span id="kpiCompanies">0</span>
+        <label>Companies</label>
+      </div>
+      <div class="kpi-card">
+        <span id="kpiBN">0</span>
+        <label>BN</label>
+      </div>
+      <div class="kpi-card">
+        <span id="kpiBG">0</span>
+        <label>BG</label>
+      </div>
+      <div class="kpi-card">
+        <span id="kpiBS">0</span>
+        <label>BS</label>
+      </div>
+    </section>
+
+    <!-- Charts -->
+    <section class="charts-grid">
+      <div class="chart-card">
+        <h3>Collaboration Distribution</h3>
+        <canvas id="collabChart"></canvas>
       </div>
 
-      <div class="panel">
-        <div class="panel-title" data-i18n="filtersTitle">Filters</div>
-
-        <div class="filter-block">
-          <label class="filter-label" data-i18n="searchLabel">Search</label>
-          <input id="fSearch" class="input" type="text" placeholder="Search title, actor, evidence..." />
-        </div>
-
-        <div class="filter-block">
-          <label class="filter-label" data-i18n="kpiFilterLabel">KPI Present</label>
-          <select id="fKPI" class="select">
-            <option value="ALL">ALL</option>
-            <option value="YES">YES</option>
-            <option value="NO">NO</option>
-            <option value="NOT STATED">NOT STATED</option>
-          </select>
-        </div>
-
-        <div class="filter-block">
-          <label class="filter-label" data-i18n="collabFilterLabel">Collaboration Type</label>
-          <div id="msCollab" class="multi-select"></div>
-        </div>
-
-        <div class="filter-block">
-          <label class="filter-label" data-i18n="esgFilterLabel">ESG Block</label>
-          <div id="msESG" class="multi-select"></div>
-        </div>
-
-        <div class="filter-block">
-          <label class="filter-label" data-i18n="sectorFilterLabel">Sector</label>
-          <div id="msSector" class="multi-select"></div>
-        </div>
-
-        <div class="filter-block">
-          <label class="filter-label" data-i18n="themeFilterLabel">Theme</label>
-          <div id="msTheme" class="multi-select"></div>
-        </div>
-
-        <div class="filter-block">
-          <label class="filter-label" data-i18n="patternFilterLabel">Pattern Group</label>
-          <div id="msPattern" class="multi-select"></div>
-        </div>
-
-        <div id="activeChips" class="chips"></div>
-
-        <div class="filter-actions">
-          <button id="btnReset" class="btn btn-outline" data-i18n="resetFilters">Reset filters</button>
-          <button id="btnExport" class="btn btn-primary" data-i18n="exportFiltered">Export filtered CSV</button>
-        </div>
+      <div class="chart-card">
+        <h3>ESG Block Distribution</h3>
+        <canvas id="esgChart"></canvas>
       </div>
 
-      <div class="panel compact">
-        <div class="panel-title" data-i18n="statusTitle">Status</div>
-        <div id="statusText" class="status-text">Loading…</div>
+      <div class="chart-card full">
+        <h3>Top Mechanism Signals</h3>
+        <canvas id="mechChart"></canvas>
       </div>
-    </aside>
+    </section>
 
-    <!-- Main -->
-    <main class="main">
-      <!-- Topbar -->
-      <section class="topbar">
-        <div class="topbar-left">
-          <h2 data-i18n="dashboardTitle">Dashboard</h2>
-          <p id="topSubtitle" data-i18n="dashboardSubtitle">
-            Evidence-backed mapping of ESG collaboration initiatives
-          </p>
-        </div>
-        <div class="topbar-right">
-          <span id="pillRows" class="pill">Rows: 0</span>
-          <span id="pillCompanies" class="pill">Companies: 0</span>
-        </div>
-      </section>
+  </main>
 
-      <!-- KPI cards -->
-      <section class="kpi-grid">
-        <div class="kpi-card">
-          <div class="kpi-label" data-i18n="kpiInitiatives">Initiatives</div>
-          <div id="kpiInitiatives" class="kpi-value">0</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label" data-i18n="kpiCompanies">Companies</div>
-          <div id="kpiCompanies" class="kpi-value">0</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">BN</div>
-          <div id="kpiBN" class="kpi-value">0</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">BG</div>
-          <div id="kpiBG" class="kpi-value">0</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">BS</div>
-          <div id="kpiBS" class="kpi-value">0</div>
-        </div>
-      </section>
+</div>
 
-      <!-- Tabs -->
-      <section class="tabs">
-        <button class="tab-btn active" data-tab="overview" data-i18n="tabOverview">Overview</button>
-        <button class="tab-btn" data-tab="patterns" data-i18n="tabPatterns">Patterns</button>
-        <button class="tab-btn" data-tab="evidence" data-i18n="tabEvidence">Evidence Explorer</button>
-        <button class="tab-btn" data-tab="method" data-i18n="tabMethod">Method</button>
-      </section>
+<script src="app.js"></script>
 
-      <!-- Overview tab -->
-      <section id="tab-overview" class="tab-panel active">
-        <div class="card-grid two">
-          <div class="card">
-            <div class="card-head">
-              <h3 data-i18n="chartCollabTitle">Collaboration Type Distribution</h3>
-            </div>
-            <div id="chartCollab" class="chart"></div>
-          </div>
-
-          <div class="card">
-            <div class="card-head">
-              <h3 data-i18n="chartESGTitle">ESG Block Distribution</h3>
-            </div>
-            <div id="chartESG" class="chart"></div>
-          </div>
-        </div>
-
-        <div class="card-grid two">
-          <div class="card">
-            <div class="card-head">
-              <h3 data-i18n="chartMechanismTitle">Mechanism Signals</h3>
-              <span class="card-note" data-i18n="chartMechanismNote">Keyword-based transparent tagging</span>
-            </div>
-            <div id="chartMechanisms" class="chart tall"></div>
-          </div>
-
-          <div class="card">
-            <div class="card-head">
-              <h3 data-i18n="chartPartnerTitle">Partner Types by Collaboration</h3>
-              <span class="card-note" data-i18n="chartPartnerNote">Counts are actor/partner mentions (edges)</span>
-            </div>
-            <div id="chartPartners" class="chart tall"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Patterns tab -->
-      <section id="tab-patterns" class="tab-panel">
-        <div class="card">
-          <div class="card-head">
-            <h3 data-i18n="patternsTop10Title">Top Pattern Groups</h3>
-            <button id="btnExportTop10" class="btn btn-outline small" data-i18n="exportTop10">Export top patterns CSV</button>
-          </div>
-          <div class="table-wrap">
-            <table id="top10Table" class="data-table"></table>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-head">
-            <h3 data-i18n="patternCardsTitle">Pattern Cards</h3>
-          </div>
-          <div id="patternCards" class="pattern-cards"></div>
-        </div>
-      </section>
-
-      <!-- Evidence tab -->
-      <section id="tab-evidence" class="tab-panel">
-        <div class="card-grid evidence-layout">
-          <div class="card">
-            <div class="card-head">
-              <h3 data-i18n="evidenceTableTitle">Initiatives</h3>
-              <div class="pager-controls">
-                <button id="btnPrevPage" class="btn btn-outline small">◀</button>
-                <span id="pageInfo" class="page-info">1 / 1</span>
-                <button id="btnNextPage" class="btn btn-outline small">▶</button>
-              </div>
-            </div>
-
-            <div class="table-wrap">
-              <table id="initiativeTable" class="data-table"></table>
-            </div>
-          </div>
-
-          <div class="card sticky">
-            <div class="card-head">
-              <h3 data-i18n="detailPanelTitle">Initiative Details</h3>
-            </div>
-
-            <div class="detail-grid">
-              <div class="detail-item">
-                <span class="detail-label" data-i18n="detailTitle">Title</span>
-                <div id="dTitle" class="detail-value">—</div>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label" data-i18n="detailCompany">Company</span>
-                <div id="dCompany" class="detail-value">—</div>
-              </div>
-              <div class="detail-row two">
-                <div class="detail-item">
-                  <span class="detail-label" data-i18n="detailTags">Labels</span>
-                  <div id="dTags" class="detail-value">—</div>
-                </div>
-                <div class="detail-item">
-                  <span class="detail-label" data-i18n="detailThemePattern">Theme / Pattern</span>
-                  <div id="dThemePattern" class="detail-value">—</div>
-                </div>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label" data-i18n="detailKPI">KPI</span>
-                <div id="dKPI" class="detail-value">—</div>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label" data-i18n="detailActors">Actors involved</span>
-                <div id="dActors" class="detail-value">—</div>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label" data-i18n="detailEvidenceMeta">Evidence source</span>
-                <div id="dEvidenceMeta" class="detail-value">—</div>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label" data-i18n="detailQuote">Short quote</span>
-                <blockquote id="dQuote" class="quote-box">—</blockquote>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label" data-i18n="detailExcerpt">Evidence excerpt</span>
-                <div id="dExcerpt" class="detail-value detail-long">—</div>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label" data-i18n="detailDescription">Description</span>
-                <div id="dDescription" class="detail-value detail-long">—</div>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label" data-i18n="detailOutcome">Outputs / outcomes</span>
-                <div id="dOutcome" class="detail-value detail-long">—</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Method tab -->
-      <section id="tab-method" class="tab-panel">
-        <div class="card">
-          <div class="card-head">
-            <h3 data-i18n="methodTitle">Technical Method (Short)</h3>
-          </div>
-          <div id="methodText" class="method-content"></div>
-        </div>
-
-        <div class="card">
-          <div class="card-head">
-            <h3 data-i18n="datasetFilesTitle">Files loaded</h3>
-          </div>
-          <ul id="filesLoadedList" class="file-list"></ul>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <script src="./app.js"></script>
 </body>
 </html>
