@@ -3,7 +3,16 @@
   --border: rgba(15,23,42,.10);
   --muted: rgba(15,23,42,.60);
   --shadow: 0 10px 30px rgba(2,6,23,.08);
+
+  /* Theme tokens used by JS + charts */
+  --page-bg: #f8fafc;
+  --page-text: #0f172a;
+  --surface: rgba(255,255,255,.85);
+  --surface-strong: rgba(255,255,255,.95);
+  --chart-grid: rgba(15,23,42,.12);
+  --chart-text: rgba(15,23,42,.85);
 }
+
 html{scroll-behavior:smooth;}
 
 .card{
@@ -123,4 +132,83 @@ tr:hover td{ background: rgba(37,99,235,.04); }
 .tab.active{
   border-color: rgba(37,99,235,.35);
   background: rgba(37,99,235,.10);
+}
+
+/* ------------------------- */
+/* DARK THEME (day/night)    */
+/* ------------------------- */
+html[data-theme="dark"]{
+  --card: rgba(15,23,42,.72);
+  --border: rgba(148,163,184,.20);
+  --muted: rgba(226,232,240,.65);
+  --shadow: 0 14px 36px rgba(0,0,0,.35);
+
+  --page-bg: #0b1220;
+  --page-text: #e5e7eb;
+  --surface: rgba(15,23,42,.72);
+  --surface-strong: rgba(15,23,42,.86);
+  --chart-grid: rgba(226,232,240,.16);
+  --chart-text: rgba(226,232,240,.88);
+}
+
+/* override tailwind body classes safely */
+html[data-theme="dark"] body{
+  background: var(--page-bg) !important;
+  color: var(--page-text) !important;
+}
+
+/* header */
+html[data-theme="dark"] header{
+  background: rgba(2,6,23,.70) !important;
+  border-bottom-color: rgba(148,163,184,.20) !important;
+}
+
+/* inputs + selects */
+html[data-theme="dark"] input,
+html[data-theme="dark"] select{
+  background: rgba(15,23,42,.86) !important;
+  color: rgba(226,232,240,.92) !important;
+  border-color: rgba(148,163,184,.22) !important;
+}
+
+/* choices */
+html[data-theme="dark"] .choices__inner{
+  background: rgba(15,23,42,.86) !important;
+  color: rgba(226,232,240,.92) !important;
+  border-color: rgba(148,163,184,.22) !important;
+}
+html[data-theme="dark"] .choices__list--dropdown,
+html[data-theme="dark"] .choices__list[aria-expanded]{
+  background: rgba(15,23,42,.92) !important;
+  color: rgba(226,232,240,.92) !important;
+  border-color: rgba(148,163,184,.22) !important;
+}
+html[data-theme="dark"] .choices__list--multiple .choices__item{
+  background: rgba(37,99,235,.22) !important;
+  color: rgba(226,232,240,.92) !important;
+  border-color: rgba(148,163,184,.22) !important;
+}
+
+/* table */
+html[data-theme="dark"] .table-wrap{
+  background: rgba(15,23,42,.70) !important;
+}
+html[data-theme="dark"] th{
+  background: rgba(2,6,23,.70) !important;
+  color: rgba(226,232,240,.78) !important;
+}
+html[data-theme="dark"] td{
+  border-bottom-color: rgba(148,163,184,.14) !important;
+}
+html[data-theme="dark"] tr:hover td{
+  background: rgba(37,99,235,.10) !important;
+}
+
+/* loading overlay */
+html[data-theme="dark"] #loadingOverlay{
+  background: rgba(2,6,23,.75) !important;
+}
+html[data-theme="dark"] .spinner{
+  border: 4px solid rgba(226,232,240,.14);
+  border-top-color: rgba(37,99,235,1);
 }
